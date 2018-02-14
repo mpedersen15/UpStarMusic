@@ -10,21 +10,13 @@ const Artist = require('../models/artist');
  */
 module.exports = (criteria, sortProperty, offset = 0, limit = 20) => {
     console.log(criteria);
+    console.log(buildFindObject(criteria));
     return Promise.all([
-        Artist.find({
-            name: {
-                $regex: criteria.name,
-                $options: 'i'
-            },
-            age: {
-                $gte: criteria.age ? criteria.age.min : 0,
-                $lte: criteria.age ? criteria.age.max : 100
-            },
-            yearsActive: {
-                $gte: criteria.yearsActive ? criteria.yearsActive.min : 0,
-                $lte: criteria.yearsActive ? criteria.yearsActive.max : 100
-            }
-        }).sort({ [sortProperty]: 1 }).skip(offset).limit(limit),
+        Artist
+            .find(buildFindObject(criteria))
+            .sort({ [sortProperty]: 1 })
+            .skip(offset)
+            .limit(limit),
         Artist.count()
     ]).then(results => {
         return {
@@ -36,3 +28,37 @@ module.exports = (criteria, sortProperty, offset = 0, limit = 20) => {
     });
 
 };
+
+function buildFindObject(criteria) {
+    /* const findObject = {
+        name: {
+            $regex: criteria.name,
+            $options: 'i'
+        }
+    }; */
+
+    const findObject = {}
+
+    if (criteria.name) {
+        findObject.$text = {
+            $search: criteria.name
+        };
+    }
+        
+
+    if (criteria.age) {
+        findObject.age = {
+            $gte: criteria.age.min,
+            $lte: criteria.age.max
+        };
+    }
+
+    if (criteria.yearsActive) {
+        findObject.yearsActive = {
+            $gte: criteria.yearsActive.min,
+            $lte: criteria.yearsActive.max
+        };
+    }
+
+    return findObject;
+}
