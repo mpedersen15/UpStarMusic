@@ -9,8 +9,6 @@ const Artist = require('../models/artist');
  * @return {promise} A promise that resolves with the artists, count, offset, and limit
  */
 module.exports = (criteria, sortProperty, offset = 0, limit = 20) => {
-    console.log(criteria);
-    console.log(buildFindObject(criteria));
     return Promise.all([
         Artist
             .find(buildFindObject(criteria))
