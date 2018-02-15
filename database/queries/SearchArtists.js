@@ -8,14 +8,14 @@ const Artist = require('../models/artist');
  * @param {integer} limit How many records to return in the result set
  * @return {promise} A promise that resolves with the artists, count, offset, and limit
  */
-module.exports = (criteria, sortProperty, offset = 0, limit = 20) => {
+module.exports = (criteria, sortProperty, offset = 0, limit = 10) => {
     return Promise.all([
         Artist
             .find(buildFindObject(criteria))
             .sort({ [sortProperty]: 1 })
             .skip(offset)
             .limit(limit),
-        Artist.count()
+        Artist.count(buildFindObject(criteria))
     ]).then(results => {
         return {
             all: results[0],
@@ -38,8 +38,13 @@ function buildFindObject(criteria) {
     const findObject = {}
 
     if (criteria.name) {
-        findObject.$text = {
+        /* findObject.$text = {
             $search: criteria.name
+        }; */
+
+        findObject.name = {
+            $regex: criteria.name,
+            $options: 'i'
         };
     }
         
